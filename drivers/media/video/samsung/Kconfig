@@ -220,3 +220,10 @@ config VIDEO_SAMSUNG_MEMSIZE_TVOUT
 	depends on VIDEO_TVOUT
 	default "16384"
 endif
+
+config GPU_CLOCK_CONTROL
+   bool "Enable GPU clock control and voltage interface"
+   depends on VIDEO_SAMSUNG
+   default y
+   help
+	 This enables a sysfs interface to control gpu clock and voltage.
