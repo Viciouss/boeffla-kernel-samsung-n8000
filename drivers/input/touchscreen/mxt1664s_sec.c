@@ -29,6 +29,8 @@
 
 #include "mxt1664s_dev.h"
 
+#include "touchboost_switch.h"
+
 #if TSP_SEC_SYSFS
 static void set_default_result(struct mxt_data_sysfs *data)
 {
@@ -1482,11 +1484,10 @@ static void mxt_set_dvfs_off(struct work_struct *work)
 
 void mxt_set_dvfs_on(struct mxt_data *data, bool en)
 {
-	if (0 == data->booster.cpu_lv)
-		exynos_cpufreq_get_level(SEC_DVFS_LOCK_FREQ,
-			&data->booster.cpu_lv);
+	exynos_cpufreq_get_level(tb_freq,
+		&data->booster.cpu_lv);
 
-	if (en) {
+	if (en && (tb_switch == TOUCHBOOST_ON)) {
 		if (!data->booster.touch_cpu_lock_status) {
 			cancel_delayed_work(&data->booster.dvfs_dwork);
 			dev_lock(data->booster.bus_dev,
@@ -1511,7 +1512,7 @@ int mxt_init_dvfs(struct mxt_data *data)
 	INIT_DELAYED_WORK(&data->booster.dvfs_dwork,
 		mxt_set_dvfs_off);
 	data->booster.bus_dev = dev_get("exynos-busfreq");
-	exynos_cpufreq_get_level(SEC_DVFS_LOCK_FREQ,
+	exynos_cpufreq_get_level(tb_freq,
 		&data->booster.cpu_lv);
 	return 0;
 }
