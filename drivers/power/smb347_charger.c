@@ -31,6 +31,12 @@
 #include <linux/slab.h>
 #include <plat/gpio-cfg.h>
 
+#include "linux/charge_level.h"
+
+int ac_level = AC_CHARGE_LEVEL_DEFAULT;    // Set AC default charge level
+int usb_level  = USB_CHARGE_LEVEL_DEFAULT; // Set USB default charge level
+#define SMB347_DIVISOR 17647
+
 /* Slave address */
 #define SMB347_SLAVE_ADDR		0x0C
 
@@ -198,8 +204,9 @@ static void smb347_charger_init(struct smb347_chg_data *chg)
 	/* Allow volatile writes to CONFIG registers */
 	smb347_i2c_write(chg->client, SMB347_COMMAND_A, 0x80);
 
-	/* Command B : USB1 mode, USB mode */
-	smb347_i2c_write(chg->client, SMB347_COMMAND_B, 0x00);
+	/* CommandB : High-current mode */
+	// we never use low power usb mode but always high-current mode
+	smb347_i2c_write(chg->client, SMB347_COMMAND_B, 0x03);
 
 	/* Charge curr : Fast-chg 2200mA */
 	/* Pre-charge curr 250mA, Term curr 250mA */
@@ -289,6 +296,8 @@ static int smb347_get_charger_is_full(void)
 static void smb347_set_charging_state(int enable, int charging_mode)
 {
 	struct smb347_chg_data *chg = smb347_chg;
+	long smb347_curr;
+	
 	pr_info("%s : enable(%d), charging_mode(%d)\n",
 		__func__, enable, charging_mode);
 
@@ -302,35 +311,41 @@ static void smb347_set_charging_state(int enable, int charging_mode)
 
 		switch (charging_mode) {
 		case CABLE_TYPE_TA:
-			/* Input current limit : DCIN 1800mA, USBIN HC 1800mA */
-			smb347_i2c_write(chg->client,
-				SMB347_INPUT_CURRENTLIMIT, 0x66);
+			/* calculate current for charger rate */
+			smb347_curr = (ac_level * 1000) / SMB347_DIVISOR;
 
-			/* CommandB : High-current mode */
-			smb347_i2c_write(chg->client, SMB347_COMMAND_B, 0x03);
-
-			pr_info("%s : 1.8A charging enable\n", __func__);
+			pr_info("Boeffla-Kernel: %s %d mA charging enable (%d)\n", __func__, ac_level, (u8) smb347_curr);
 			break;
+			
 		case CABLE_TYPE_DESKDOCK:
-			/* Input current limit : DCIN 1500mA, USBIN HC 1500mA */
-			smb347_i2c_write(chg->client,
-				SMB347_INPUT_CURRENTLIMIT, 0x55);
+			/* calculate current for charger rate */
+			smb347_curr = (ac_level * 1000) / SMB347_DIVISOR;
 
-			/* CommandB : High-current mode */
-			smb347_i2c_write(chg->client, SMB347_COMMAND_B, 0x03);
-			pr_info("%s : 1.5A charging enable\n", __func__);
+			pr_info("Boeffla-Kernel: %s %d mA charging enable (%d)\n", __func__, ac_level, (u8) smb347_curr);
 			break;
+			
 		case CABLE_TYPE_USB:
-			/* CommandB : USB5 */
-			smb347_i2c_write(chg->client, SMB347_COMMAND_B, 0x02);
-			pr_info("%s : LOW(USB5) charging enable\n", __func__);
+			/* calculate current for USB rate */
+			smb347_curr = (usb_level * 1000) / SMB347_DIVISOR;
+
+			pr_info("Boeffla-Kernel: %s %d mA charging enable (%d)\n", __func__, usb_level, (u8) smb347_curr);
 			break;
+			
 		default:
-			/* CommandB : USB1 */
-			smb347_i2c_write(chg->client, SMB347_COMMAND_B, 0x00);
-			pr_info("%s : LOW(USB1) charging enable\n", __func__);
+			/* calculate current for USB rate */
+			smb347_curr = (usb_level * 1000) / SMB347_DIVISOR;
+
+			pr_info("Boeffla-Kernel: %s %d mA charging enable (%d)\n", __func__, usb_level, (u8) smb347_curr);
 			break;
 		}
+
+		/* set input current limit */
+		smb347_i2c_write(chg->client,
+			SMB347_INPUT_CURRENTLIMIT, smb347_curr);
+
+		/* CommandB : High-current mode */
+		// we never use low power usb mode but always high-current mode
+		smb347_i2c_write(chg->client, SMB347_COMMAND_B, 0x03);
 
 		smb347_enable_charging(chg);
 	} else {
@@ -482,17 +497,17 @@ int smb347_get_aicl_current(void)
 void smb347_set_charging_current(int set_current)
 {
 	struct smb347_chg_data *chg = smb347_chg;
+	long smb347_curr;
+	
+	/* CommandB : High-current mode */
+	smb347_i2c_write(chg->client, SMB347_COMMAND_B, 0x03);
 
-	if (set_current > 450) {
-		/* CommandB : High-current mode */
-		smb347_i2c_write(chg->client, SMB347_COMMAND_B, 0x03);
-		udelay(10);
-	} else {
-		/* CommandB : USB5 */
-		smb347_i2c_write(chg->client, SMB347_COMMAND_B, 0x02);
-		udelay(10);
-	}
-	pr_debug("%s: Set charging current as %dmA.\n", __func__, set_current);
+	/* set input current limit */
+	smb347_curr = (set_current * 1000) / SMB347_DIVISOR;
+	smb347_i2c_write(chg->client, SMB347_INPUT_CURRENTLIMIT, (u8) smb347_curr);
+	udelay(10);
+
+	pr_debug("Boeffla-Kernel: %s set charging current as %dmA (%d).\n", __func__, set_current, (u8) smb347_curr);
 }
 
 static int smb347_i2c_probe
