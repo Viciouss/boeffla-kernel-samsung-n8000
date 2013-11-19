@@ -1,5 +1,8 @@
 #!/system/bin/sh
 
+# n801x version 
+# -> different AC default charge rate
+
 # define basic kernel configuration
 # *********************************************************
 
@@ -112,9 +115,9 @@ CWM_RESET_ZIP="boeffla-config-reset-v2.zip"
 	echo 256 > /sys/block/mmcblk1/bdi/read_ahead_kb
 	echo $(date) "SDcard buffer tweaks (256 kb) applied for external sd memory" >> $BOEFFLA_LOGFILE
 
-	# AC charging rate defaults defaults to 1100 mA
-	echo "1100" > /sys/kernel/charge_levels/charge_level_ac
-	echo $(date) "AC charge rate set to 1100 mA" >> $BOEFFLA_LOGFILE
+	# AC charging rate defaults defaults to 1900 mA
+	echo "1900" > /sys/kernel/charge_levels/charge_level_ac
+	echo $(date) "AC charge rate set to 1900 mA" >> $BOEFFLA_LOGFILE
 
 # init.d support
 	echo $(date) Execute init.d scripts start >> $BOEFFLA_LOGFILE
