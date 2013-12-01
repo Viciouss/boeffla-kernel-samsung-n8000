@@ -1,5 +1,5 @@
 /*
- * Author: andip71, 27.01.2013
+ * Author: andip71, 01.12.2013
  *
  * This software is licensed under the terms of the GNU General Public
  * License version 2, as published by the Free Software Foundation, and
@@ -25,3 +25,6 @@ extern int usb_level;
 
 #define USB_CHARGE_LEVEL_MIN 0
 #define USB_CHARGE_LEVEL_MAX 1600
+
+extern char charge_info_text[30];
+extern int charge_info_level;

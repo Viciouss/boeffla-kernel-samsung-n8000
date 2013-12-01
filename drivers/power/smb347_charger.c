@@ -35,6 +35,9 @@
 
 int ac_level = AC_CHARGE_LEVEL_DEFAULT;    // Set AC default charge level
 int usb_level  = USB_CHARGE_LEVEL_DEFAULT; // Set USB default charge level
+char charge_info_text[30];
+int charge_info_level;
+
 #define SMB347_DIVISOR 17647
 
 /* Slave address */
@@ -187,6 +190,9 @@ static void smb347_disable_charging(struct smb347_chg_data *chg)
 {
 	pr_info("%s\n", __func__);
 	smb347_i2c_write(chg->client, SMB347_COMMAND_A, 0x80);
+	
+	charge_info_level = 0;
+	sprintf(charge_info_text, "No charger");
 }
 
 static void smb347_charger_init(struct smb347_chg_data *chg)
@@ -313,28 +319,32 @@ static void smb347_set_charging_state(int enable, int charging_mode)
 		case CABLE_TYPE_TA:
 			/* calculate current for charger rate */
 			smb347_curr = (ac_level * 1000) / SMB347_DIVISOR;
-
+			charge_info_level = ac_level;
+			sprintf(charge_info_text, "AC Charger");
 			pr_info("Boeffla-Kernel: %s %d mA charging enable (%d)\n", __func__, ac_level, (u8) smb347_curr);
 			break;
 			
 		case CABLE_TYPE_DESKDOCK:
 			/* calculate current for charger rate */
 			smb347_curr = (ac_level * 1000) / SMB347_DIVISOR;
-
+			charge_info_level = ac_level;
+			sprintf(charge_info_text, "Desk dock");
 			pr_info("Boeffla-Kernel: %s %d mA charging enable (%d)\n", __func__, ac_level, (u8) smb347_curr);
 			break;
 			
 		case CABLE_TYPE_USB:
 			/* calculate current for USB rate */
 			smb347_curr = (usb_level * 1000) / SMB347_DIVISOR;
-
+			charge_info_level = usb_level;
+			sprintf(charge_info_text, "USB charger");
 			pr_info("Boeffla-Kernel: %s %d mA charging enable (%d)\n", __func__, usb_level, (u8) smb347_curr);
 			break;
 			
 		default:
 			/* calculate current for USB rate */
 			smb347_curr = (usb_level * 1000) / SMB347_DIVISOR;
-
+			charge_info_level = usb_level;
+			sprintf(charge_info_text, "Default");
 			pr_info("Boeffla-Kernel: %s %d mA charging enable (%d)\n", __func__, usb_level, (u8) smb347_curr);
 			break;
 		}
@@ -507,6 +517,8 @@ void smb347_set_charging_current(int set_current)
 	smb347_i2c_write(chg->client, SMB347_INPUT_CURRENTLIMIT, (u8) smb347_curr);
 	udelay(10);
 
+	charge_info_level = set_current;
+	sprintf(charge_info_text, "Set charge current");
 	pr_debug("Boeffla-Kernel: %s set charging current as %dmA (%d).\n", __func__, set_current, (u8) smb347_curr);
 }
 
@@ -597,6 +609,10 @@ MODULE_DEVICE_TABLE(i2c, smb347_id);
 
 static int __init smb347_init(void)
 {
+	// initialize charge info variables
+	charge_info_level = 0;
+	sprintf(charge_info_text, "No charger");
+
 	return i2c_add_driver(&smb347_i2c_driver);
 }
 

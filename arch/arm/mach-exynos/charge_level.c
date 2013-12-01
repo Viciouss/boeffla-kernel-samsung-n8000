@@ -1,5 +1,5 @@
 /*
- * Author: andip71, 27.01.2013
+ * Author: andip71, 01.12.2013
  *
  * This software is licensed under the terms of the GNU General Public
  * License version 2, as published by the Free Software Foundation, and
@@ -91,6 +91,14 @@ static ssize_t charge_level_usb_store(struct kobject *kobj, struct kobj_attribut
 	return count;
 }
 
+static ssize_t charge_info_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
+{
+
+	// print charge info
+	return sprintf(buf, "%s / %d mA", charge_info_text, charge_info_level);
+
+}
+
 
 
 /* Initialize charge level sysfs folder */
@@ -101,9 +109,13 @@ __ATTR(charge_level_ac, 0666, charge_level_ac_show, charge_level_ac_store);
 static struct kobj_attribute charge_level_usb_attribute =
 __ATTR(charge_level_usb, 0666, charge_level_usb_show, charge_level_usb_store);
 
+static struct kobj_attribute charge_info_attribute =
+__ATTR(charge_info, 0666, charge_info_show, NULL);
+
 static struct attribute *charge_level_attrs[] = {
 &charge_level_ac_attribute.attr,
 &charge_level_usb_attribute.attr,
+&charge_info_attribute.attr,
 NULL,
 };
 
