@@ -1,6 +1,6 @@
 # Boeffla-Config controller interface
 #
-# Version: No GPU frequencies
+# Version: GPU 4 frequencies
 #
 # (C) andip71
 
@@ -65,27 +65,32 @@ if [ "lov_presets" == "$1" ]; then
 	echo "Power extreme~"
 	echo "Gov: lulzactiveq / no profile"
 	echo "^Sched: row / row"
-	echo "^CPU: 1600 / no uv;"
+	echo "^CPU: 1600 / no uv"
+	echo "^GPU: 440-700 / +50mV;"
 	
 	echo "Power~"
 	echo "Gov: zzmoove / zzmoove-performance"
 	echo "^Sched: row / row"
-	echo "^CPU: 1500 / no uv;"
+	echo "^CPU: 1500 / no uv"
+	echo "^GPU: 266-533 / no uv;"
 	
 	echo "Standard~"
 	echo "Gov: pegasusq / no profile"
 	echo "^Sched: cfq / cfq"
-	echo "^CPU: 1400 / no uv;"
+	echo "^CPU: 1400 / no uv"
+	echo "^GPU: 160-440 / no uv;"
 	
 	echo "Battery friendly~"
 	echo "Gov: pegasusq / boeffla-moderate"
 	echo "^Sched: cfq / cfq"
-	echo "^CPU: 1400 / -25mV;"
+	echo "^CPU: 1400 / -25mV"
+	echo "^GPU: 160/266 / -25mV;"
 	
 	echo "Battery saving~"
 	echo "Gov: zzmoove / zzmoove-battery"
 	echo "^Sched: cfq / cfq"
-	echo "^CPU: 1000 / light uv;"
+	echo "^CPU: 1000 / light uv"
+	echo "^GPU: 160/266 / light uv;"
 	
 	exit 0
 fi
@@ -101,14 +106,14 @@ if [ "conf_presets" == "$1" ]; then
 		echo "lulzactiveq;None;"
 		echo "row;row;"
 		echo "1600000;None;"
-		echo "None;None"
+		echo "440/533/600/700;overvolt +50mV"
 	fi
 	if [ "Power" ==  "$2" ]; then
 		# gov, gov prof, sched int, sched ext, cpu max, cpu uv, gpu freq, gpu uv
 		echo "zzmoove;zzmoove - performance;"
 		echo "row;row;"
 		echo "1500000;None;"
-		echo "None;None"
+		echo "266/350/440/533;None"
 	fi
 	if [ "Standard" ==  "$2" ]; then
 		# gov, gov prof, sched int, sched ext, cpu max, cpu uv, gpu freq, gpu uv
@@ -122,14 +127,14 @@ if [ "conf_presets" == "$1" ]; then
 		echo "pegasusq;pegasusq - boeffla moderate;"
 		echo "cfq;cfq;"
 		echo "1400000;undervolt -25mV;"
-		echo "None;None"
+		echo "160/266;undervolt -25mV"
 	fi
 	if [ "Battery saving" ==  "$2" ]; then
 		# gov, gov prof, sched int, sched ext, cpu max, cpu uv, gpu freq, gpu uv
 		echo "zzmoove;zzmoove - battery;"
 		echo "cfq;cfq;"
 		echo "1000000;undervolt light;"
-		echo "None;None"
+		echo "160/266;undervolt light"
 	fi
 	exit 0
 fi
@@ -330,7 +335,7 @@ fi
 
 if [ "param_charge_rates" == "$1" ]; then
 	# AC charge min/max/steps
-	echo "100;2200;25;"
+	echo "100;1600;25;"
 	# USB charge min/max/steps
 	echo "0;1600;25;"
 	# Wireless charge min/max/steps
