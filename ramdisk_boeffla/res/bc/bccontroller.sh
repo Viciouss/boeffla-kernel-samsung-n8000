@@ -9,7 +9,7 @@
 # ********************************
 
 # kernel specification (hardware; type; target; url)
-KERNEL_SPECS="n8010;samsung;jb41;http://boeffla.df-kunde.de/n8010/boeffla-kernel/"
+KERNEL_SPECS="n8000;samsung;jb41;http://boeffla.df-kunde.de/n8000/boeffla-kernel/"
 
 # path to kernel libraries
 LIBPATH="/lib/modules"				# Samsung
